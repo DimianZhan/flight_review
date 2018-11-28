@@ -116,13 +116,13 @@ def generate_plots(ulog, px4_ulog, db_data, vehicle_data, link_to_3d_page):
 #        plots.extend(gps_plots)
 
 
-    if is_running_locally():
+#    if is_running_locally():
         # show the google maps plot via Bokeh, since the one in the html
         # template does not work locally (we disable it further down)
-        map_plot = plot_map(ulog, plot_config, map_type='google', api_key=
-                            get_google_maps_api_key(), setpoints=False)
-        if map_plot is not None:
-            plots.append(map_plot)
+        #map_plot = plot_map(ulog, plot_config, map_type='google', api_key=
+        #                    get_google_maps_api_key(), setpoints=False)
+        #if map_plot is not None:
+        #    plots.append(map_plot)
 
 
     # Position plot
@@ -141,7 +141,18 @@ def generate_plots(ulog, px4_ulog, db_data, vehicle_data, link_to_3d_page):
                  bokeh_plot=data_plot.bokeh_plot)
         if data_plot.finalize() is not None:
             plots.append(data_plot.bokeh_plot)
-            if not is_running_locally(): # do not enable Google Map if running locally
+            # Position focus
+            try:
+                local_pos_data = ulog.get_dataset('vehicle_local_position')
+                indices = np.nonzero(local_pos_data.data['ref_timestamp'])
+                if len(indices[0]) > 0:
+                    focus_lat = local_pos_data.data['ref_lat'][indices[0][0]]
+                    focus_lon = local_pos_data.data['ref_lon'][indices[0][0]]
+                    lat_lon_focus = {'lat': focus_lat, 'lon': focus_lon}
+                    curdoc().template_variables['lat_lon_focus'] = lat_lon_focus
+            except:
+                pass
+            if not is_running_locally(): # do not enable Leaflet Map if running locally
                 curdoc().template_variables['has_position_data'] = True
 
     # initialize parameter changes
@@ -155,12 +166,6 @@ def generate_plots(ulog, px4_ulog, db_data, vehicle_data, link_to_3d_page):
 
     x_range_offset = (ulog.last_timestamp - ulog.start_timestamp) * 0.05
     x_range = Range1d(ulog.start_timestamp - x_range_offset, ulog.last_timestamp + x_range_offset)
-
-    # Position focus
-    lat_focus = (data[0].data.get('lat').tolist())[0]
-    lon_focus = (data[0].data.get('lon').tolist())[0]
-    lat_lon_focus = {'lat':lat_focus, 'lon':lon_focus}
-    curdoc().template_variables['lat_lon_focus'] = lat_lon_focus
 
     # Altitude estimate
     data_plot = DataPlot(data, plot_config, 'vehicle_gps_position',
