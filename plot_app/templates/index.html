@@ -16,8 +16,6 @@
 {{ info_table_html }}
 {{ error_labels_html }}
 
-{% if has_position_data %}
-
 <div id="mapid"></div>
 
 <script>
@@ -34,8 +32,6 @@ var kmlurl = window.location.protocol+'//'+window.location.host+'/download'+loca
 
 omnivore.kml(kmlurl).addTo(mymap);
 </script>
-
-{% endif %}
 
 {% if is_plot_page %}
 
