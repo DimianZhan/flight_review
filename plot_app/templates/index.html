@@ -20,10 +20,14 @@
 
 <script>
 var lat_lon_focus = {{ lat_lon_focus }};
+var lat_lon_min = {{ lat_lon_min }};
+var lat_lon_max = {{ lat_lon_max }}
+var corner1 = new L.latLng(lat_lon_min.lat, lat_lon_min.lon),
+    corner2 = new L.latLng(lat_lon_max.lat, lat_lon_max.lon),
+    lat_lon_bound = new L.latLngBounds(corner1, corner2);
 var mymap = L.map('mapid').setView([lat_lon_focus.lat, lat_lon_focus.lon],15);
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-    maxZoom: 18,
     id: 'mapbox.satellite',
     accessToken: '{{ mapbox_api_access_token }}'
 }).addTo(mymap);
@@ -31,6 +35,9 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={
 var kmlurl = window.location.protocol+'//'+window.location.host+'/download'+location.search+'&type=2&randnotused='+Math.random().toString(36).substring(3)
 
 omnivore.kml(kmlurl).addTo(mymap);
+
+mymap.fitBounds(lat_lon_bound);
+
 </script>
 
 {% if is_plot_page %}

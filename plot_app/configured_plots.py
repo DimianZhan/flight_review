@@ -143,13 +143,19 @@ def generate_plots(ulog, px4_ulog, db_data, vehicle_data, link_to_3d_page):
             plots.append(data_plot.bokeh_plot)
             # Position focus
             try:
-                local_pos_data = ulog.get_dataset('vehicle_local_position')
-                indices = np.nonzero(local_pos_data.data['ref_timestamp'])
-                if len(indices[0]) > 0:
-                    focus_lat = local_pos_data.data['ref_lat'][indices[0][0]]
-                    focus_lon = local_pos_data.data['ref_lon'][indices[0][0]]
-                    lat_lon_focus = {'lat': focus_lat, 'lon': focus_lon}
-                    curdoc().template_variables['lat_lon_focus'] = lat_lon_focus
+                local_gps_data = ulog.get_dataset('vehicle_gps_position')
+                max_lat = local_gps_data.data['lat'].max()/pow(10,7)
+                min_lat = local_gps_data.data['lat'].min()/pow(10,7)
+                max_lon = local_gps_data.data['lon'].max()/pow(10,7)
+                min_lon = local_gps_data.data['lon'].min()/pow(10,7)
+                lat_lon_min = {'lat':min_lat, 'lon':min_lon}
+                lat_lon_max = {'lat':max_lat, 'lon':max_lon}
+                focus_lat = local_gps_data.data['lat'][0]/pow(10,7)
+                focus_lon = local_gps_data.data['lon'][0]/pow(10,7)
+                lat_lon_focus = {'lat': focus_lat, 'lon': focus_lon}
+                curdoc().template_variables['lat_lon_focus'] = lat_lon_focus
+                curdoc().template_variables['lat_lon_min'] = lat_lon_min
+                curdoc().template_variables['lat_lon_max'] = lat_lon_max
             except:
                 pass
             if not is_running_locally(): # do not enable Leaflet Map if running locally
